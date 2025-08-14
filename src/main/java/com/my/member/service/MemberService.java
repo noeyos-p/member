@@ -4,6 +4,7 @@ import com.my.member.dto.MemberDto;
 import com.my.member.entity.Member;
 import com.my.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
@@ -60,5 +61,18 @@ public class MemberService {
     public void deleteMember(Long id) {
         // 삭제처리
         repository.deleteById(id);
+    }
+
+    public MemberDto findMember(Long updateId) {
+        // 검색해 보기
+        // 비어있는지 검사 찾으면 DTO로 변환 후 돌려주고
+        // 없으면 null return
+        Member member = repository.findById(updateId).orElse(null);
+        // member가 null 인지 확인
+        if (ObjectUtils.isEmpty(member)) {
+            return null;
+        } else {
+            return MemberDto.fromMemberEntity(member);
+        }
     }
 }
