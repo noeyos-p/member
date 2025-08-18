@@ -82,4 +82,19 @@ public class MemberService {
         // 2. 수정 요청
         repository.save(member);
     }
+
+    public List<MemberDto> searchMember(String type, String keyword) {
+        // 조건 :
+        // 1. type 이 비어있을 때 : 전체 검색
+        // 2. type = 'name' -> searchName
+        // 3. type = 'address' -> searchAddress
+        switch (type) {
+            case "name" :
+                return repository.searchName(keyword).stream().map(x -> MemberDto.fromMemberEntity(x)).toList();
+            case "address":
+                return repository.searchAddress(keyword).stream().map(x -> MemberDto.fromMemberEntity(x)).toList();
+            default:
+                return repository.searchQuery().stream().map(x -> MemberDto.fromMemberEntity(x)).toList();
+        }
+    }
 }

@@ -3,10 +3,12 @@ package com.my.member.controller;
 import com.my.member.dto.MemberDto;
 import com.my.member.entity.Member;
 import com.my.member.service.MemberService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,12 +30,22 @@ public class MemberController {
     }
 
     @GetMapping("/member/insertForm")
-    public String insertFormView() {
+    public String insertFormView(Model model) {
+        // insertForm에 껍데기 dto를 보냄
+        model.addAttribute("dto", new MemberDto());
         return "insertForm";
     }
 
     @PostMapping("/member/insert")
-    public String insert(MemberDto dto) {
+    // validation 체크 수정함
+    public String insert(@Valid @ModelAttribute("dto") MemberDto dto,
+                         BindingResult bindingResult) {
+        // 0. DTO에서 설정한 Validation에 오류가 있는지 검사
+        // 만약, 오류가 있다면 insertForm을 다시 보여준 후 종료
+        if(bindingResult.hasErrors()) {
+            return "insertForm";
+        }
+
         // 1. 폼에서 보낸 정보를 DTO로 받는다
         System.out.println(dto);
         // 2. 받은 DTO를 서비스로 보낸다.
@@ -65,9 +77,30 @@ public class MemberController {
     }
 
     @PostMapping("/member/update")
-    public String update(@ModelAttribute("dto")MemberDto dto) {
+    public String update(@Valid @ModelAttribute("dto")MemberDto dto,
+                         BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return "updateForm";
+        }
         System.out.println(dto);
         service.updateMember(dto);
         return "redirect:/list";
+    }
+
+    @GetMapping("/member/search")
+    public String search(@RequestParam("type") String type,
+                         @RequestParam("keyword") String keyword,
+                         Model model) {
+        List<MemberDto> searchList = service.searchMember(type, keyword);
+        if (ObjectUtils.isEmpty(searchList)) {
+            // 검색결과가 없을 경우
+            searchList = null;
+            model.addAttribute("list", searchList);
+        } else {
+            // 검색 결과가 있을 경우
+            model.addAttribute("list", searchList);
+        }
+        return "showMember";
+        // select * from member where address like '%서울%';
     }
 }
