@@ -102,4 +102,9 @@ public class UserController {
         model.addAttribute("user", user);
         return "/user/userUpdate";
     }
+
+    @GetMapping("myPage")
+    public String myPage() {
+        return "/user/myPage";
+    }
 }
